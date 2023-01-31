@@ -25,7 +25,7 @@ while True:
         elif force.get_force_newton() >= 5:
             print("Going Down Suckers!")
             for i in range(0,7):
-                hub.speaker.beep(60, 0.5)
+                hub.speaker.beep(84, 0.5)
                 motor_pair_odin.move(1, 'cm', -100, 100)
                 motor_pair_dva.move(1, 'cm', -100, -100)
             is_up = False
@@ -36,11 +36,10 @@ while True:
         if distance.get_distance_cm() <= 20:
             distance.light_up_all(0)
             for i in range(0,3):
-                hub.speaker.beep(60, 0.5)
+                hub.speaker.beep(84, 0.5)
             for i in range(0,7):
                 motor_pair_odin.move(1, 'cm', 100, 100)
                 motor_pair_dva.move(1, 'cm', 100, -100)
             is_up = True
             # wait_for_seconds(5)
             continue;
-            
