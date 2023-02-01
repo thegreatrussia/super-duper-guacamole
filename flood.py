@@ -32,10 +32,10 @@ tips = [
     "setting.motor_pair_mo 값을 수정해, 모터가 한번 움직일 때, 얼마나 회전할 지 설정할 수 있답니다.",
     "프로그램 내부에서는 True는 setting.true로, False은 setting.false로 표현합니다.",
     "허브의 상태 색은, 프로그램 상태에 따라 바뀝니다.",
-    "노란색 상태 등은, 현재 기본 상태, 즉, 프로그램이 아무것도 처리하지 않고 있다는 의미입니다!",
-    "파란색 상태 등은, 특정 반경 안에, 어떠한 객체가 접근했음을 의미합니다. 이 상태등의 우선순위는 기본 상태등보다 높습니다."
-    "빨간색 상태 등은, 허브가 내려가고 있다는 의미입니다!",
-    "초록색 상태 등은, 허브가 올라가고 있다는 의미입니다!",
+    "노란색 상태 등은, 현재 기본 상태, 즉, 프로그램이 아무것도 처리하지 않고 있다는 의미입니다",
+    "주황색 상태 등은, 특정 반경 안에, 어떠한 객체가 접근했음을 의미합니다. 이 상태등의 우선순위는 기본 상태등보다 높습니다."
+    "초록색 상태 등은, 허브가 내려가고 있다는 의미입니다!",
+    "빨간색 상태 등은, 허브가 올라가고 있다는 의미입니다!",
     "setting.undefined는 None과 동일한 값입니다. 그저 개발자가 JavaScript에 익숙할 뿐이에요",
     "setting.hub_beep_standard를 수정해, 허브가 올라가거나, 내려갈 때, 혹은 에러 발생 시 발생하는 비프음의 기본값을 설정할 수 있습니다",
     "setting.motor_stdunit을 수정해, 모터가 움직일 때 사용할 단위를 변경할 수 있습니다. 기본 값은 cm입니다.",
@@ -56,9 +56,9 @@ setting = {
     "motor_stdunit": 'cm',
     "hub_down_newton": 5,
     "default_color": 'yellow',
-    "hub_up_color": 'green',
-    "hub_warning_color": 'blue',
-    "hub_down_color": 'red',
+    "hub_up_color": 'red',
+    "hub_warning_color": 'orange',
+    "hub_down_color": 'green',
     "motor_pair_mo": 1,
     "undefined": None,
     "true": True,
@@ -76,60 +76,61 @@ class Flood:
     def __init__(self, hub:PrimeHub):
         self.hub = hub
         self.is_up = setting["false"]
-    # 
+    
     def light(self, color: str) -> bool:
         if not color:self.hub.status_light.on(setting["default_color"])
         else:self.hub.status_light.on(color)
         return setting["true"]
-    
+
     @staticmethod
     def tip() -> str:
         return random.choice(tips)
-    
+
     @staticmethod
     def msgs() -> list[str]:
         return messages_list
-    
+
     @staticmethod
     def last_msg() -> str:
         return Flood.msgs()[-1]
-    
+
     @staticmethod
     def add_msg(message_code: str = "NULL") -> bool:
         messages_list.append(message_code)
         return True
-    
+
     @staticmethod
     def display_wait(dur: int) -> bool:
         for i in range(dur, 0, -1):
             wait_for_seconds(1)
         return setting["true"]
-        
+
     @staticmethod
     def wait(dur: int) -> bool:
         Flood.display_wait(dur)
         return setting["true"]
-    
+
     def set_is_up(self, value: bool):
         if value == self.is_up: return False
         self.is_up = value
         return True
-    
+
     def upable(self):
         if self.is_up: return setting["false"]
-        
+        return True
+
 def printf(message: str, message_code: str = "NULL") -> bool:
     if message_code == Flood.last_msg(): return False
     print(message)
     Flood.add_msg(message_code)
     return True
-        
+
 distance.light_up_all() # горит датчик расстояния!
 hub.status_light.on(setting["default_color"])
 printf("Это набор из нескольких простых техник! Надеюсь, вам понравится!", "PROGRAM_INTRO")
 printf("Handshaking With Hub! 🤝 Nice To Meet you Hub!", "HANDSHAKE_HUB")
 printf("Как тебя зовут?", "WHAT_IS_YOUR_NAME")
-name = input("Пожалуйста, скажи мне, как тебя зовут!: ")
+name = "test_dogeblock_ru_account"
 printf("привет, \"{0}\"! 👋 приятно встретить тебя!".format(name), "HELLO_USER")
 print("=" * 50)
 printf("ты знаешь? \"{0}\"".format(Flood.tip()), "INTRO_TIPS")
@@ -137,8 +138,8 @@ print("=" * 50)
 Flood.wait(1)
 
 def hub_down():
-    printf("Я спускаюсь, 🍂 привет земля! 🌍", "HELLO_GROUND") # ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
-    hub.status_light(setting["hub_down_color"])
+    printf("Я спускаюсь, 🍂 привет земля! 🌍", "HELLO_GROUND") # ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
+    hub.status_light.on(setting["hub_down_color"])
     for i in range(setting["zero"], setting["hub_up_steps"]):
         hub.speaker.beep(setting["hub_beep_standard"], setting["beep_stddur"])
         motor_pair_odin.move(setting["motor_pair_mo"], setting["motor_stdunit"], -100, 100)
@@ -146,48 +147,32 @@ def hub_down():
     hub.status_light.on(setting["default_color"])
 
 # while True
+flood = Flood(hub)
 while setting["true"]:
-    flood = Flood(hub)
     if init_required == True:
         printf("я запускаю Hub.... он будет завершен в любые секунды! 😊", "INITING_HUB")
         distance.light_up_all(100)
-        init_required = setting["false"]
-        printf("Привет, 👋 {0}!".format(name), "HELLO_USER")
-        
+        init_required = False
+
     if force.is_pressed() and (force.get_force_newton() != setting["undefined"]):
-        if is_up == setting["false"]:
+        if flood.is_up == setting["false"]:
             printf("Ignore", "IGNORE_FORCES_PRESS")
-        elif force.get_force_newton() <= setting["hub_down_newton"]:
-            if not push_mod:
-                printf("Используемый вами режим не является режимом \"push\" 🥴", "MODE_IS_NOT_PUSH_MOD")
-                pass;
+        elif force.get_force_newton() >= setting["hub_down_newton"]:
             hub_down()
-            is_up = setting["false"]
+            flood.set_is_up(setting["false"])
             init_required = setting["true"]
             continue;
-        elif force.get_force_newton() > setting["hub_down_newton"]:
-            hub.status_light.on("cyan")
-            printf("Изменение программного режима... Пожалуйста, подождите 🙏", "CHANGE_MODE")
-            push_mod = (not push_mod)
-            printf("данные сохранены, 💾 перезапуск.... 😊", "CHANGE_MODE_DONE")
-            hub.status_light.on(setting["default_color"])
-            continue
-        
+
     _distance = distance.get_distance_cm()
     if _distance == setting["undefined"]:
         continue;
     if _distance <= 1:
         printf("Program exiting... (code: 1)", "PrOgRaM_eXiT")
-        break
+        break;
     # 만약 거리가 undefined에 해당하지 아니하는 경우
     if _distance != setting["undefined"]:
-        if is_up and (_distance >= setting["safe_distance"]):
-            hub_down()
-            is_up = setting["false"]
-            init_required = setting["true"]
-            continue
         # Hub Warning!
-        if (not is_up) and _distance <= setting["warning_distance"]:
+        if flood.upable() and _distance <= setting["warning_distance"]:
             printf("⚠️ Предупреждение! Что-то приближается! ⚠️", "SOMETHING_APPROACHING")
             hub.status_light.on(setting["hub_warning_color"])
         # 허브가 올라간다!
@@ -197,13 +182,12 @@ while setting["true"]:
                 continue;
             printf("Я поднимаюсь! Здравствуй, 👋 Голубое Небо! ☁️", "HELLO_SKY") # 존나 웃기네 ㅋㅋㅋㅋㅋㅋㅋ
             distance.light_up_all(setting["zero"])
-            for i in range(setting["zero"], 3):
-                hub.speaker.beep(setting["hub_beep_standard"], setting["beep_stddur"])
             hub.status_light.on(setting["hub_up_color"])
             for i in range(setting["zero"], setting["hub_up_steps"]):
+                hub.speaker.beep(setting["hub_beep_standard"], setting["beep_stddur"])
                 motor_pair_odin.move(setting["motor_pair_mo"], setting["motor_stdunit"], 100, 100)
                 motor_pair_dva.move(setting["motor_pair_mo"], setting["motor_stdunit"], 100, -100)
             hub.status_light.on(setting["default_color"])
-            is_up = setting["true"]
+            flood.set_is_up(setting["true"])
             # wait_for_seconds(5)
             continue;
