@@ -2,17 +2,17 @@ from spike import PrimeHub, LightMatrix, Button, StatusLight, ForceSensor, Motio
 from spike.control import wait_for_seconds, wait_until, Timer
 from math import *
 import random
-
+# sensors
 hub = PrimeHub()
 motor_pair_odin = MotorPair('F', 'A')
 motor_pair_dva = MotorPair('B', 'E')
 distance = DistanceSensor('C')
 force = ForceSensor('D')
-
+# consts -> pypy.wlr
 push_mod = True
 init_required = False
 is_up = False
-
+# tips for admin
 tips = [
     "update.thesb0pybot-api.kro.kr에서 이 프로그램에 대한 무료 업데이트를 받을 수 있습니다.",
     "ko-script.thesb0pybot-api.kro.kr에서 이 프로그램의 한국어 스크립트를 확인 할 수 있습니다. (Default: Russian)",
@@ -44,7 +44,7 @@ tips = [
     "모든 버전 기록은 olds.thesb0pybot-api.kro.kr에서 확인 할 수 있습니다.",
     "ForceSensor(을)를 눌러 모드를 바꾸면, None-Push Mode, Push Mode 순으로 연속해 변경됩니다."
 ]
-
+# settings for non-programmers
 setting = {
     "zero": 0,
     "safe_distance":40,
@@ -55,6 +55,7 @@ setting = {
     "beep_stddur": 0.5,
     "motor_stdunit": 'cm',
     "hub_down_newton": 5,
+    "force_down_percentage": 50,
     "default_color": 'yellow',
     "hub_up_color": 'red',
     "hub_warning_color": 'orange',
@@ -64,67 +65,64 @@ setting = {
     "true": True,
     "false": False
 }
-
-messages_list = [
-    "INIT_DEVELOPER"
-]
-
-# printf
-
-
+# this uses in printf function (def printf)
+messages_list = ["INIT_DEVELOPER"]
+# class Flood for fun. function is fun (in kt hah!)
 class Flood:
     def __init__(self, hub:PrimeHub):
         self.hub = hub
         self.is_up = setting["false"]
-    
+    # light method controls status_light of hub
     def light(self, color: str) -> bool:
         if not color:self.hub.status_light.on(setting["default_color"])
         else:self.hub.status_light.on(color)
         return setting["true"]
-
+    # static method tip returns random values in tips!
     @staticmethod
     def tip() -> str:
         return random.choice(tips)
-
+    # static method msgs returns list[str] type(messages_list!)
     @staticmethod
     def msgs() -> list[str]:
         return messages_list
-
+    # static method last_msg returns last values of Flood.msgs() (-> messages_list)
     @staticmethod
     def last_msg() -> str:
         return Flood.msgs()[-1]
-
+    # static method add_msg adds message type in messages_list!
     @staticmethod
     def add_msg(message_code: str = "NULL") -> bool:
         messages_list.append(message_code)
-        return True
-
+        return setting["true"]
+    # static method display_wait is display times in screen
     @staticmethod
     def display_wait(dur: int) -> bool:
         for i in range(dur, 0, -1):
+            hub.light_matrix.write(i) # non-tested method
             wait_for_seconds(1)
         return setting["true"]
-
+    # static method wait calls Flood.display_wait in inside of code
     @staticmethod
     def wait(dur: int) -> bool:
         Flood.display_wait(dur)
         return setting["true"]
-
-    def set_is_up(self, value: bool):
-        if value == self.is_up: return False
+    # set Flood.is_up variable
+    def set_is_up(self, value: bool) -> bool:
+        if value == self.is_up: return setting["false"]
         self.is_up = value
-        return True
-
-    def upable(self):
+        return setting["true"]
+    # check hub is upable
+    def upable(self) -> bool:
         if self.is_up: return setting["false"]
-        return True
-
+        return setting["true"]
+# most important of this program! printf function
+# printf function requires 2 params. must give message params
 def printf(message: str, message_code: str = "NULL") -> bool:
-    if message_code == Flood.last_msg(): return False
+    if message_code == Flood.last_msg(): return setting["false"]
     print(message)
     Flood.add_msg(message_code)
-    return True
-
+    return setting["true"]
+# intro and initing process
 distance.light_up_all() # горит датчик расстояния!
 hub.status_light.on(setting["default_color"])
 printf("Это набор из нескольких простых техник! Надеюсь, вам понравится!", "PROGRAM_INTRO")
@@ -136,33 +134,32 @@ print("=" * 50)
 printf("ты знаешь? \"{0}\"".format(Flood.tip()), "INTRO_TIPS")
 print("=" * 50)
 Flood.wait(1)
-
+# hub_down function to hub down
 def hub_down():
-    printf("Я спускаюсь, 🍂 привет земля! 🌍", "HELLO_GROUND") # ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
+    printf("Я спускаюсь, 🍂 привет земля! 🌍", "HELLO_GROUND") # 문법에 안맞는 개소맄ㅋㅋㅋㅋ
     hub.status_light.on(setting["hub_down_color"])
     for i in range(setting["zero"], setting["hub_up_steps"]):
         hub.speaker.beep(setting["hub_beep_standard"], setting["beep_stddur"])
         motor_pair_odin.move(setting["motor_pair_mo"], setting["motor_stdunit"], -100, 100)
         motor_pair_dva.move(setting["motor_pair_mo"], setting["motor_stdunit"], -100, -100)
     hub.status_light.on(setting["default_color"])
-
 # while True
 flood = Flood(hub)
 while setting["true"]:
-    if init_required == True:
+    if init_required == setting["true"]:
         printf("я запускаю Hub.... он будет завершен в любые секунды! 😊", "INITING_HUB")
         distance.light_up_all(100)
-        init_required = False
-
+        init_required = setting["false"]
+    # force is_pressed() is true, then call test force.get_force_newton()!
     if force.is_pressed() and (force.get_force_newton() != setting["undefined"]):
         if flood.is_up == setting["false"]:
             printf("Ignore", "IGNORE_FORCES_PRESS")
-        elif force.get_force_newton() >= setting["hub_down_newton"]:
-            hub_down()
+        elif (force.get_force_newton() >= setting["hub_down_newton"]) or (force.get_force_percentage() >= setting["force_down_percentage"]):
+            hub_down();
             flood.set_is_up(setting["false"])
             init_required = setting["true"]
             continue;
-
+    # distance.get_distance_cm()를 여러번 호출하면 가끔 한두개씩 undefined가 떠서 안됨 ㅅㄱ
     _distance = distance.get_distance_cm()
     if _distance == setting["undefined"]:
         continue;
